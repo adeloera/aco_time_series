@@ -1,0 +1,611 @@
+---
+title: "ACO_Year_Builder"
+author: "Andres de Loera-Brust"
+date: "March 17, 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(janitor)
+library(readr)
+library(readxl)
+library(tidyverse)
+library(ggthemes)
+
+```
+
+
+## ACO Year File
+
+```{r aco-year, cache = TRUE, include = FALSE}
+
+#Here I download the ACO level datasets with more detailed program paramenters 
+#from the CMS website and perform some basic cleaning. 
+
+#To create a length of service variable I will use four date variables I will create here.
+
+date2018 <- as.Date("2019/01/01")
+date2017 <- as.Date("2018/01/01")
+date2016 <- as.Date("2017/01/01")
+date2015 <- as.Date("2016/01/01")
+date2014 <- as.Date("2015/01/01")
+date2013 <- as.Date("2014/01/01")
+
+aco_id_crosswalk <- read_excel("ACO-ID-crosswalk.xlsx", 
+    sheet = "ACO ID Crosswalk") %>%
+  clean_names()
+
+#I begin with the 2018 dataset. 
+#I read in the dataset from a url of CMS's data download site. I use col_names and deliberately set the format of some of the columns. 
+
+aco_data_2018 <- read_csv("https://data.cms.gov/api/views/v47u-yq84/rows.csv?accessType=DOWNLOAD&bom=true&format=true") %>%
+  
+  #I call clean_names for ease of use later.
+  
+  clean_names() %>%
+  
+  #I mutate to make one track variable
+  
+  mutate(current_track_1 = ifelse(current_track_1 == 1, "MSSP Track 1", ""),
+         current_track_2 = ifelse(current_track_2 == 1, "MSSP Track 2", ""),
+         current_track_3 = ifelse(current_track_3 == 1, "MSSP Track 3", ""),
+         current_track = trimws(paste(current_track_1, current_track_2, current_track_3))) %>%
+  
+  #I add the aco_num ID by merging with the crosswalk.
+  
+  left_join(aco_id_crosswalk, by = c("aco_id")) %>%
+  
+  #I also select just the variables that I may use in later analysis to have a more managable dataset. 
+  
+  select(aco_num, aco_name, aco_state, initial_start_date, current_start_date, current_track, n_ab, sav_rate, min_sav_perc, bnchmk_min_exp, gen_save_loss, earn_save_loss, qual_score, updated_bnchmk, a_btot_bnchmk, a_btot_exp, final_share_rate, per_capita_exp_total_py)%>%
+  
+  #Next I reformat the intital start time variable as a date and creating a "length of service" variable. 
+  
+  mutate(initial_start_date = as.Date(initial_start_date, format = "%m/%d/%Y"),
+         service_length = date2017-initial_start_date,
+         
+         current_start_date = as.Date(current_start_date, format = "%m/%d/%Y"),
+         
+  #Critically, I also add a year variable. 
+  
+         year = 2018) 
+
+
+#Now 2017
+#I read in the dataset from a url of CMS's data download site. I use col_names and deliberately set the format of some of the columns. 
+
+aco_data_2017 <- read_csv("https://data.cms.gov/api/views/gk7c-vejx/rows.csv?accessType=DOWNLOAD",
+                          col_names = TRUE,
+                          cols(
+                            .default = col_double(),
+                            ACO_Num = col_character(),
+                            ACO_Name = col_character(),
+                            ACO_State = col_character(),
+                            Agree_Type = col_character(),
+                            Initial_Start_Date = col_character(),
+                            Current_Start_Date = col_character(),
+                            ACO18 = col_character(),
+                            ACO19 = col_character(),
+                            ACO20 = col_character(),
+                            ACO42 = col_character(),
+                            ACO40 = col_character(),
+                            DM_Comp = col_character(),
+                            ACO27 = col_character(),
+                            ACO41 = col_character(),
+                            ACO28 = col_character(),
+                            ACO30 = col_character()
+                          )) %>%
+  
+  #I call clean_names for ease of use later.
+  
+  clean_names() %>%
+  
+  #I mutate to make one track variable
+  
+  mutate(current_track_1 = ifelse(current_track_1 == 1, "MSSP Track 1", ""),
+         current_track_2 = ifelse(current_track_2 == 1, "MSSP Track 2", ""),
+         current_track_3 = ifelse(current_track_3 == 1, "MSSP Track 3", ""),
+         current_track = trimws(paste(current_track_1, current_track_2, current_track_3))) %>%
+  
+  #I also select just the variables that I may use in later analysis to have a more managable dataset. 
+  
+  select(aco_num, aco_name, aco_state, initial_start_date, current_start_date, current_track, n_ab, sav_rate, min_sav_perc, bnchmk_min_exp, gen_save_loss, earn_save_loss, qual_score, updated_bnchmk, a_btot_bnchmk, a_btot_exp, final_share_rate, per_capita_exp_total_py)%>%
+  
+  #Next I reformat the intital start time variable as a date and creating a "length of service" variable. 
+  
+  mutate(initial_start_date = as.Date(initial_start_date, format = "%m/%d/%Y"),
+         service_length = date2017-initial_start_date,
+         
+         current_start_date = as.Date(current_start_date, format = "%m/%d/%Y"),
+         
+  #Critically, I also add a year variable. 
+  
+         year = 2017) 
+
+#Now for 2016: 
+#I read in the dataset from a url of CMS's data download site. I use col_names and deliberately set the format of some of the columns. 
+
+aco_data_2016 <- read_csv("https://data.cms.gov/api/views/3jk5-q6dr/rows.csv?accessType=DOWNLOAD",
+                          col_names = TRUE,
+                          cols(
+                            .default = col_double(),
+                            ACO_Num = col_character(),
+                            ACO_Name = col_character(),
+                            ACO_State = col_character(),
+                            Agree_Type = col_character(),
+                            Initial_Start_Date = col_character(),
+                            Current_Start_Date = col_character(),
+                            ACO18 = col_character(),
+                            ACO19 = col_character(),
+                            ACO20 = col_character(),
+                            ACO42 = col_character(),
+                            ACO40 = col_character(),
+                            DM_Comp = col_character(),
+                            ACO27 = col_character(),
+                            ACO41 = col_character(),
+                            ACO28 = col_character(),
+                            ACO30 = col_character()
+                          )) %>%
+  
+  #I call clean_names for ease of use later.
+  
+  clean_names() %>%
+  
+  #I also select just the variables that I may use in later analysis to have a more managable dataset. 
+  
+  select(aco_num, aco_name, aco_state, initial_start_date, n_ab, sav_rate, bnchmk_min_exp, gen_save_loss, earn_save_loss, qual_score, updated_bnchmk, a_btot_bnchmk, a_btot_exp, final_share_rate, per_capita_exp_total_py)%>%
+  
+  #Next I reformat the intital start time variable as a date and creating a "length of service" variable. 
+  
+  mutate(initial_start_date = as.Date(initial_start_date, format = "%m/%d/%Y"),
+         service_length = date2016-initial_start_date,
+         
+  #Critically, I also add a year variable. 
+  
+         year = 2016) 
+
+
+#Again for 2015: 
+#I read in the dataset from a url of CMS's data download site. I use col_names and deliberately set the format of some of the columns. 
+
+aco_data_2015 <- read_csv("https://data.cms.gov/api/views/7rrf-3gxr/rows.csv?accessType=DOWNLOAD",
+                          col_names = TRUE,
+                          cols(
+                            .default = col_double(),
+                            ACO_Num = col_character(),
+                            ACO_Name = col_character(),
+                            ACO_State = col_character(),
+                            Start_Date = col_character()
+                            )) %>%
+  
+  #I call clean_names for ease of use later.
+  
+  clean_names() %>%
+  
+  #mutate to make the quality score out of 1
+  
+  mutate(qual_score = qual_score/100) %>%
+  
+  #I also select just the variables that I may use in later analysis to have a more managable dataset. 
+  
+  select(aco_num, aco_name, aco_state, start_date, n_ab, sav_rate, bnchmk_min_exp, gen_save_loss, earn_save_loss, qual_score, updated_bnchmk, a_btot_bnchmk, a_btot_exp, final_share_rate, per_capita_exp_total_py) %>%
+  
+  #Next I reformat the intital start time variable as a date and creating a "length of service" variable. 
+  
+  mutate(initial_start_date = as.Date(start_date, format = "%m/%d/%Y"),
+         service_length = date2015-initial_start_date,
+         
+  #Critically, I also add a year variable. 
+  
+         year = 2015) %>%
+  
+  #For consistent format, I drop the old "start date" variable.
+  
+  select(-start_date)
+
+#And lastly 2014: 
+#I read in the dataset from a url of CMS's data download site. I use col_names and deliberately set the format of some of the columns. 
+
+aco_data_2014 <- read_csv("https://data.cms.gov/api/views/888h-akbg/rows.csv?accessType=DOWNLOAD",
+                          col_names = TRUE,
+                          cols(
+                            .default = col_double(),
+                            ACO_Num = col_character(),
+                            ACO_NAME = col_character(),
+                            ACO_State = col_character(),
+                            Start_Date = col_character(),
+                            QualScore = col_double()
+)) %>%
+  
+  #I call clean_names for ease of use later.
+  
+  clean_names() %>%
+  
+  #I also select just the variables that I may use in later analysis to have a more managable dataset. 
+  
+  select(aco_num, aco_name, aco_state, start_date, n_ab, sav_rate, bnchmk_min_exp, gen_save_loss, earn_save_loss, qual_score, updated_bnchmk, a_btot_bnchmk, a_btot_exp, final_share_rate, per_capita_exp_total_py) %>%
+  
+  #Next I reformat the intital start time variable as a date and creating a "length of service" variable. 
+  
+  mutate(initial_start_date = as.Date(start_date, format = "%m/%d/%Y"),
+         service_length = date2014-initial_start_date,
+         
+  #Critically, I also add a year variable. 
+  
+         year = 2014)  %>%
+  
+  #For consistent format, I drop the old "start date" variable.
+  
+  select(-start_date)
+
+
+aco_data_2013 <- read.csv("https://data.cms.gov/api/views/faep-t7cf/rows.csv?accessType=DOWNLOAD") %>%
+   clean_names() %>%
+  
+  select(aco_num, aco_name, start_date, n_ab, bnchmk_min_exp, earn_shr_savings, min_loss_perc, min_sav_perc, qual_score, a_btot_bnchmk, a_btot_exp, final_share_rate) %>%
+  
+
+  mutate(initial_start_date = as.Date(start_date, format = "%m/%d/%Y"),
+         service_length = date2013-initial_start_date,
+ 
+         year = 2013)  %>%
+  
+  select(-start_date)
+
+
+
+# I also want the count of provider participants. I download that here.
+
+# First for 2017
+#I read in the data directly from the CMS data website.
+aco_participants_2017 <- read_csv("https://data.cms.gov/api/views/futz-eezk/rows.csv?accessType=DOWNLOAD",
+                             col_names = TRUE,
+                             cols(
+                               .default = col_character(),
+                               Agreement_Period_Num = col_double(),
+                               Track_1 = col_double(),
+                               Track_2 = col_double(),
+                               Track_3 = col_double(),
+                               Adv_Pay = col_double(),
+                               AIM = col_double()
+                               )
+                             ) %>%
+
+  #I call clean names for ease of use
+
+  clean_names() %>%
+
+  #And I add a year variable to collapse on later.
+
+  mutate(year = 2017)
+
+#I now repeat for the other years
+
+aco_participants_2016 <- read_csv("https://data.cms.gov/api/views/82gp-26ev/rows.csv?accessType=DOWNLOAD",
+                             col_names = TRUE,
+                             cols(
+                               .default = col_character(),
+                               Agreement_Period_Num = col_double(),
+                               Track_1 = col_double(),
+                               Track_2 = col_double(),
+                               Track_3 = col_double(),
+                               Adv_Pay = col_double(),
+                               AIM = col_double()
+                               )
+                             ) %>%
+  clean_names() %>%
+  mutate(year = 2016)
+
+aco_participants_2015 <- read_csv("https://data.cms.gov/api/views/pfam-u3vp/rows.csv?accessType=DOWNLOAD",
+                             col_names = TRUE,
+                             cols(
+                               .default = col_character(),
+                               Agreement_Period_Num = col_double(),
+                               Track_1 = col_double(),
+                               Track_2 = col_double(),
+                               Track_3 = col_double(),
+                               Adv_Pay = col_double(),
+                               AIM = col_double()
+                               )
+                             ) %>%
+  clean_names() %>%
+  mutate(year = 2015)
+
+aco_participants_2014 <- read_csv("https://data.cms.gov/api/views/w3ec-v85z/rows.csv?accessType=DOWNLOAD",
+                             col_names = TRUE,
+                             cols(
+                               .default = col_character(),
+                               Agreement_Period_Num = col_double(),
+                               Track_1 = col_double(),
+                               Track_2 = col_double(),
+                               Track_3 = col_double(),
+                               Adv_Pay = col_double(),
+                               AIM = col_double()
+                               )
+                             ) %>%
+  clean_names() %>%
+  mutate(year = 2014)
+
+
+#Now I do some manipulation on the detailed ACO level datasets to accomplish two goals:
+#First, generate a dummy variable for exit, entry, and stasis.
+#Second, append all the years of data to create an ACO master file.
+
+#To generate dummies for entry and exit I use joins to get a list of which ACOs are new to a year and which are no longer present.
+
+#To generate variables for entry in 2014 and exit in 2017 I use datasets for 2018 and 2013 that simply have a roster of ACOs. Though this isnt enough for the analysis I want to present it is enough to determine which ACO numbers are new or disappear.
+
+acos_in_2019 <- read_csv("https://data.cms.gov/api/views/seu9-q8uk/rows.csv?accessType=DOWNLOAD&bom=true&format=true",
+                         col_names = TRUE) %>%
+  clean_names() %>%
+  left_join(aco_id_crosswalk, by = c("aco_id")) %>%
+  select(aco_num)
+
+acos_in_2013 <- read_csv("https://data.cms.gov/api/views/faep-t7cf/rows.csv?accessType=DOWNLOAD",
+                         col_names = TRUE) %>%
+  clean_names() %>%
+  select(aco_num)
+
+#To get new ACOs for year X I use anti_join with year X-1 on the left.
+
+new_acos_2018 <- anti_join(aco_data_2018, aco_data_2017, by = "aco_num") %>%
+
+  #Then I select just the ACO number, which I'll use later.
+
+  select(aco_num) %>%
+
+  #I also create an indicator variable for entrance:
+
+  mutate(entered  = 1)
+
+#Agan, to get new ACOs for year X I use anti_join with year X-1 on the left.
+
+new_acos_2017 <- anti_join(aco_data_2017, aco_data_2016, by = "aco_num") %>%
+
+  #Then I select just the ACO number, which I'll use later.
+
+  select(aco_num) %>%
+
+  #I also create an indicator variable for entrance:
+
+  mutate(entered  = 1)
+
+#Again, I perform the join.
+
+new_acos_2016 <- anti_join(aco_data_2016, aco_data_2015, by = "aco_num") %>%
+
+  #Then I select just the ACO number, which I'll use later.
+
+  select(aco_num) %>%
+
+  #I also create an indicator variable for entrance:
+
+  mutate(entered  = 1)
+
+#Again, I perform the join.
+
+new_acos_2015 <- anti_join(aco_data_2015, aco_data_2014, by = "aco_num") %>%
+
+  #Then I select just the ACO number, which I'll use later.
+
+  select(aco_num) %>%
+
+  #I also create an indicator variable for entrance:
+
+  mutate(entered  = 1)
+
+#Again, I perform the join.
+
+new_acos_2014 <- anti_join(aco_data_2014, acos_in_2013, by = "aco_num") %>%
+
+  #Then I select just the ACO number, which I'll use later.
+
+  select(aco_num) %>%
+
+  #I also create an indicator variable for entrance:
+
+  mutate(entered  = 1)
+
+#To get ACOs that exited after year X I use anti_join with year X+1 on the left.
+
+exit_acos_2018 <- anti_join(aco_data_2018, acos_in_2019, by = "aco_num") %>%
+
+  #Then I select just the ACO number, which I'll use later.
+
+  select(aco_num) %>%
+
+  #I also create an indicator variable for exit:
+
+  mutate(exit = 1)
+
+#Again
+
+exit_acos_2017 <- anti_join(aco_data_2017, aco_data_2018, by = "aco_num") %>%
+
+  #Then I select just the ACO number, which I'll use later.
+
+  select(aco_num) %>%
+
+  #I also create an indicator variable for exit:
+
+  mutate(exit = 1)
+
+#Again, I perform the join.
+
+exit_acos_2016 <- anti_join(aco_data_2016, aco_data_2017, by = "aco_num") %>%
+
+  #Then I select just the ACO number, which I'll use later.
+
+  select(aco_num) %>%
+
+  #I also create an indicator variable for exit:
+
+  mutate(exit = 1)
+
+#Again, I perform the join.
+
+exit_acos_2015 <- anti_join(aco_data_2015, aco_data_2016, by = "aco_num") %>%
+
+  #Then I select just the ACO number, which I'll use later.
+
+  select(aco_num) %>%
+
+  #I also create an indicator variable for exit:
+
+  mutate(exit = 1)
+
+#Again, I perform the join.
+
+exit_acos_2014 <- anti_join(aco_data_2014, aco_data_2015, by = "aco_num") %>%
+
+  #Then I select just the ACO number, which I'll use later.
+
+  select(aco_num) %>%
+
+  #I also create an indicator variable for exit:
+
+  mutate(exit = 1)
+
+
+#Now with these lists of exit and entrance I mutate the datasets to add a variable for exit and entrance:
+
+#I start with the base dataset I will mutate.
+
+aco_temp_2018 <- aco_data_2018 %>%
+
+  #Then I join the "new_acos" and "exit_acos" data for the year.
+
+  left_join(new_acos_2018, by = "aco_num") %>%
+  left_join(exit_acos_2018, by = "aco_num") %>%
+
+  #Then I mutate to make a proper dummy variable for entrance and exit.
+
+  mutate(entered = replace_na(entered, 0),
+         exit = replace_na(exit, 0)) %>%
+  select(-current_start_date, -min_sav_perc, -current_track)
+
+#I start with the base dataset I will mutate.
+
+aco_temp_2017 <- aco_data_2017 %>%
+
+  #Then I join the "new_acos" and "exit_acos" data for the year.
+
+  left_join(new_acos_2017, by = "aco_num") %>%
+  left_join(exit_acos_2017, by = "aco_num") %>%
+
+  #Then I mutate to make a proper dummy variable for entrance and exit.
+
+  mutate(entered = replace_na(entered, 0),
+         exit = replace_na(exit, 0)) %>%
+  select(-current_start_date, -min_sav_perc, -current_track)
+
+#Repeating for 2016:
+#I start with the base dataset I will mutate.
+
+aco_temp_2016 <- aco_data_2016 %>%
+
+  #Then I join the "new_acos" and "exit_acos" data for the year.
+
+  left_join(new_acos_2016, by = "aco_num") %>%
+  left_join(exit_acos_2016, by = "aco_num") %>%
+
+  #Then I mutate to make a proper dummy variable for entrance and exit.
+
+  mutate(entered = replace_na(entered, 0),
+         exit = replace_na(exit, 0))
+
+#Repeating again for 2015:
+#I start with the base dataset I will mutate.
+
+aco_temp_2015 <- aco_data_2015 %>%
+
+  #Then I join the "new_acos" and "exit_acos" data for the year.
+
+  left_join(new_acos_2015, by = "aco_num") %>%
+  left_join(exit_acos_2015, by = "aco_num") %>%
+
+  #Then I mutate to make a proper dummy variable for entrance and exit.
+
+  mutate(entered = replace_na(entered, 0),
+         exit = replace_na(exit, 0))
+
+#And finally for 2014:
+#I start with the base dataset I will mutate.
+
+aco_temp_2014 <- aco_data_2014 %>%
+
+  #Then I join the "new_acos" and "exit_acos" data for the year.
+
+  left_join(new_acos_2014, by = "aco_num") %>%
+  left_join(exit_acos_2014, by = "aco_num") %>%
+
+  #Then I mutate to make a proper dummy variable for entrance and exit.
+
+  mutate(entered = replace_na(entered, 0),
+         exit = replace_na(exit, 0))
+
+#Next I want to add the count of counties for each ACO in each year.
+
+aco_county_benes_2018 <- read_csv("https://data.cms.gov/api/views/qu23-5j39/rows.csv?accessType=DOWNLOAD&bom=true&format=true") %>%
+  clean_names()
+
+aco_county_benes_2017 <- read_csv("https://data.cms.gov/api/views/y488-g7nb/rows.csv?accessType=DOWNLOAD&bom=true&format=true") %>%
+  clean_names()
+
+ aco_county_benes_2016 <- read_csv("https://data.cms.gov/api/views/2b7v-mbms/rows.csv?accessType=DOWNLOAD&bom=true&format=true") %>%
+   clean_names()
+
+aco_county_benes_2015 <- read_csv("https://data.cms.gov/api/views/7z8m-92ty/rows.csv?accessType=DOWNLOAD&bom=true&format=true") %>%
+  clean_names()
+
+aco_county_benes_2014 <- read_csv("https://data.cms.gov/api/views/gi89-kbif/rows.csv?accessType=DOWNLOAD&bom=true&format=true") %>%
+  clean_names()
+
+#Now I merge them all together
+
+aco_county_all <- rbind(aco_county_benes_2014, aco_county_benes_2015, aco_county_benes_2016, aco_county_benes_2017, aco_county_benes_2018)
+
+#Then I collapse them by ACO year to get a count of county presence at the right unit of observation.
+
+aco_county_count <- aco_county_all %>%
+  left_join(aco_id_crosswalk, by = c("aco_id")) %>%
+  mutate(aco_num = ifelse(is.na(aco_num), aco_id, aco_num)) %>%
+  group_by(aco_num, year) %>%
+  summarize(counties = n())
+
+
+#Now to merge all the datasets together.
+#I start by appending the more detailed files.
+
+aco_year_master <- rbind(aco_temp_2018, aco_temp_2017, aco_temp_2016, aco_temp_2015, aco_temp_2014) %>%
+
+  #Then I join the county counts.
+
+  full_join(aco_county_count, by = c("aco_num", "year")) %>%
+
+  #I also rename some variables for my own preferences.
+
+  rename(number_of_benes = n_ab, rate_save_loss = sav_rate, total_bnchmk = a_btot_bnchmk, total_exp = a_btot_exp, per_cap_exp = per_capita_exp_total_py, per_cap_bnchmk = updated_bnchmk) 
+
+#Finally I write out an rds file to be used elsewhere.
+
+write_csv(aco_year_master, "aco_year_master_file.csv")
+```
+
+```{r removal, include = FALSE}
+
+#And I remove the unnecessary objects made to date.
+rm(date2013, date2014, date2015, date2016, date2017,
+   aco_temp_2014, aco_temp_2015, aco_temp_2016, aco_temp_2017, aco_temp_2018, 
+   acos_in_2013, acos_in_2019,
+   aco_county_benes_2014, aco_county_benes_2015, aco_county_benes_2016, aco_county_benes_2017, aco_county_benes_2018,
+   aco_participants_2014, aco_participants_2015, aco_participants_2016, aco_participants_2017,
+#
+   aco_data_2013, aco_data_2014, aco_data_2015, aco_data_2016, aco_data_2017, aco_data_2018,
+#
+   exit_acos_2014, exit_acos_2015, exit_acos_2016, exit_acos_2017, exit_acos_2018,
+   new_acos_2014, new_acos_2015, new_acos_2016, new_acos_2017, new_acos_2018)
+
+```
