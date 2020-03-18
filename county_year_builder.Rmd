@@ -454,6 +454,6 @@ county_medicare_2007 <- read_excel("State County All Table 2017.xlsx",
 county_year_medicare_master <- rbind(county_medicare_2007, county_medicare_2008, county_medicare_2009, county_medicare_2010, county_medicare_2011, county_medicare_2012, county_medicare_2013, county_medicare_2014, county_medicare_2015, county_medicare_2016, county_medicare_2017) %>%
   filter(!is.na(state_and_county_fips_code))
 
-write_csv(county_year_medicare_master, "county_year_master.csv")
+write_csv(county_year_medicare_master, "county_year_master_file.csv")
 
 ```
