@@ -1,0 +1,459 @@
+---
+title: "County Year Builder"
+author: "Andres de Loera-Brust"
+date: "March 17, 2020"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(readxl)
+library(lubridate)
+library(janitor)
+library(broom)
+library(tidyverse)
+
+```
+
+
+```{r, warning = FALSE}
+#First I download the zip file with all the data.
+
+download.file(url = "https://downloads.cms.gov/files/State-County-All-Table-2017.zip",
+              dest = "medicare_spending.zip",
+              mode = "wb")
+
+#I then unzip it, which yields "State County All Table 2017.xlsx" which has a lot of data for each year. 
+#The data for each year is kept as a seperate sheet in this spreadsheet. 
+
+unzip("medicare_spending.zip")
+
+#Now I read in and lightly clean the data for each year. 
+#Starting with 2017...
+
+county_medicare_2017 <- read_excel("State County All Table 2017.xlsx", 
+    sheet = "State_county 2017", skip = 1) %>%
+  
+  #I call clean names to ease of use.
+  
+  clean_names() %>%
+  
+  #I select just the variables I will use
+  
+  select(state, county, state_and_county_fips_code, beneficiaries_with_part_a_and_part_b, ffs_beneficiaries, ma_beneficiaries, ma_participation_rate, average_age, total_actual_costs, actual_per_capita_costs) %>%
+
+  
+  #I then set variables to be numerics with zeroes as appropriate. 
+  
+  mutate(beneficiaries_with_part_a_and_part_b = as.numeric(beneficiaries_with_part_a_and_part_b),
+         beneficiaries_with_part_a_and_part_b = replace_na(beneficiaries_with_part_a_and_part_b, 0),
+         ma_beneficiaries = as.numeric(ma_beneficiaries),
+         ma_beneficiaries = replace_na(ma_beneficiaries, 0),
+         average_age = as.numeric(average_age),
+         average_age = replace_na(average_age, 0),
+         actual_per_capita_costs = as.numeric(actual_per_capita_costs),
+         actual_per_capita_costs = replace_na(actual_per_capita_costs, 0),
+         total_actual_costs = as.numeric(total_actual_costs),
+         total_actual_costs = replace_na(total_actual_costs, 0),
+         ffs_beneficiaries = as.numeric(ffs_beneficiaries),
+         ffs_beneficiaries = replace_na(ffs_beneficiaries, 0)) %>%
+  
+  #I also set the FIPS code to be a character 
+  
+  mutate(state_and_county_fips_code = as.character(state_and_county_fips_code),
+         state_and_county_fips_code = str_pad(state_and_county_fips_code, 5, pad= "0")) %>%
+  
+  #Lastly I mutate the state variable from codes to names and make a year variable.
+  
+  mutate(state = state.name[match(state,state.abb)],
+         year = 2017)
+
+#I repeat the process for the preceding years too. 
+#Now 2016...
+
+county_medicare_2016 <- read_excel("State County All Table 2017.xlsx", 
+    sheet = "State_county 2016", skip = 1) %>%
+  
+  #I call clean names to ease of use.
+  
+  clean_names() %>%
+  
+  #I select just the variables I will use
+  
+  select(state, county, state_and_county_fips_code, beneficiaries_with_part_a_and_part_b, ffs_beneficiaries, ma_beneficiaries, ma_participation_rate, average_age, total_actual_costs, actual_per_capita_costs) %>%
+  
+  #I then set variables to be numerics with zeroes as appropriate. 
+  
+  mutate(beneficiaries_with_part_a_and_part_b = as.numeric(beneficiaries_with_part_a_and_part_b),
+         beneficiaries_with_part_a_and_part_b = replace_na(beneficiaries_with_part_a_and_part_b, 0),
+         ma_beneficiaries = as.numeric(ma_beneficiaries),
+         ma_beneficiaries = replace_na(ma_beneficiaries, 0),
+         average_age = as.numeric(average_age),
+         average_age = replace_na(average_age, 0),
+         actual_per_capita_costs = as.numeric(actual_per_capita_costs),
+         actual_per_capita_costs = replace_na(actual_per_capita_costs, 0),
+         total_actual_costs = as.numeric(total_actual_costs),
+         total_actual_costs = replace_na(total_actual_costs, 0),
+         ffs_beneficiaries = as.numeric(ffs_beneficiaries),
+         ffs_beneficiaries = replace_na(ffs_beneficiaries, 0)) %>%
+  
+  #I also set the FIPS code to be a character 
+  
+  mutate(state_and_county_fips_code = as.character(state_and_county_fips_code),
+         state_and_county_fips_code = str_pad(state_and_county_fips_code, 5, pad= "0")) %>%
+  
+  #Lastly I mutate the state variable from codes to names and make a year variable.
+  
+  mutate(state = state.name[match(state,state.abb)],
+         year = 2016)
+
+#Now for 2015:
+
+county_medicare_2015 <- read_excel("State County All Table 2017.xlsx", 
+    sheet = "State_county 2015", skip = 1) %>%
+  
+  #I call clean names to ease of use.
+  
+  clean_names() %>%
+  
+  #I select just the variables I will use
+  
+  select(state, county, state_and_county_fips_code, beneficiaries_with_part_a_and_part_b, ffs_beneficiaries, ma_beneficiaries, ma_participation_rate, average_age, total_actual_costs, actual_per_capita_costs) %>%
+  
+  #I then set variables to be numerics with zeroes as appropriate. 
+  
+  mutate(beneficiaries_with_part_a_and_part_b = as.numeric(beneficiaries_with_part_a_and_part_b),
+         beneficiaries_with_part_a_and_part_b = replace_na(beneficiaries_with_part_a_and_part_b, 0),
+         ma_beneficiaries = as.numeric(ma_beneficiaries),
+         ma_beneficiaries = replace_na(ma_beneficiaries, 0),
+         average_age = as.numeric(average_age),
+         average_age = replace_na(average_age, 0),
+         actual_per_capita_costs = as.numeric(actual_per_capita_costs),
+         actual_per_capita_costs = replace_na(actual_per_capita_costs, 0),
+         total_actual_costs = as.numeric(total_actual_costs),
+         total_actual_costs = replace_na(total_actual_costs, 0),
+         ffs_beneficiaries = as.numeric(ffs_beneficiaries),
+         ffs_beneficiaries = replace_na(ffs_beneficiaries, 0)) %>%
+  
+   #I also set the FIPS code to be a character 
+  
+  mutate(state_and_county_fips_code = as.character(state_and_county_fips_code),
+         state_and_county_fips_code = str_pad(state_and_county_fips_code, 5, pad= "0")) %>%
+  
+  #Lastly I mutate the state variable from codes to names and make a year variable.
+  
+  mutate(state = state.name[match(state,state.abb)],
+         year = 2015)
+
+#And for 2014:
+
+county_medicare_2014 <- read_excel("State County All Table 2017.xlsx", 
+    sheet = "State_county 2014", skip = 1) %>%
+  
+  #I call clean names to ease of use.
+  
+  clean_names() %>%
+  
+  #I select just the variables I will use
+  
+  select(state, county, state_and_county_fips_code, beneficiaries_with_part_a_and_part_b, ffs_beneficiaries, ma_beneficiaries, ma_participation_rate, average_age, total_actual_costs, actual_per_capita_costs) %>%
+  
+  #I then set variables to be numerics with zeroes as appropriate. 
+  
+  mutate(beneficiaries_with_part_a_and_part_b = as.numeric(beneficiaries_with_part_a_and_part_b),
+         beneficiaries_with_part_a_and_part_b = replace_na(beneficiaries_with_part_a_and_part_b, 0),
+         ma_beneficiaries = as.numeric(ma_beneficiaries),
+         ma_beneficiaries = replace_na(ma_beneficiaries, 0),
+         average_age = as.numeric(average_age),
+         average_age = replace_na(average_age, 0),
+         actual_per_capita_costs = as.numeric(actual_per_capita_costs),
+         actual_per_capita_costs = replace_na(actual_per_capita_costs, 0),
+         total_actual_costs = as.numeric(total_actual_costs),
+         total_actual_costs = replace_na(total_actual_costs, 0),
+         ffs_beneficiaries = as.numeric(ffs_beneficiaries),
+         ffs_beneficiaries = replace_na(ffs_beneficiaries, 0)) %>%
+  
+#I also set the FIPS code to be a character 
+  
+  mutate(state_and_county_fips_code = as.character(state_and_county_fips_code),
+         state_and_county_fips_code = str_pad(state_and_county_fips_code, 5, pad= "0")) %>%
+  
+  #Lastly I mutate the state variable from codes to names and make a year variable.
+  
+  mutate(state = state.name[match(state,state.abb)],
+         year = 2014)
+
+#And for 2013:
+
+county_medicare_2013 <- read_excel("State County All Table 2017.xlsx", 
+    sheet = "State_county 2013", skip = 1) %>%
+  
+  #I call clean names to ease of use.
+  
+  clean_names() %>%
+  
+  #I select just the variables I will use
+  
+  select(state, county, state_and_county_fips_code, beneficiaries_with_part_a_and_part_b, ffs_beneficiaries, ma_beneficiaries, ma_participation_rate, average_age, total_actual_costs, actual_per_capita_costs) %>%
+  
+  #I then set variables to be numerics with zeroes as appropriate. 
+  
+  mutate(beneficiaries_with_part_a_and_part_b = as.numeric(beneficiaries_with_part_a_and_part_b),
+         beneficiaries_with_part_a_and_part_b = replace_na(beneficiaries_with_part_a_and_part_b, 0),
+         ma_beneficiaries = as.numeric(ma_beneficiaries),
+         ma_beneficiaries = replace_na(ma_beneficiaries, 0),
+         average_age = as.numeric(average_age),
+         average_age = replace_na(average_age, 0),
+         actual_per_capita_costs = as.numeric(actual_per_capita_costs),
+         actual_per_capita_costs = replace_na(actual_per_capita_costs, 0),
+         total_actual_costs = as.numeric(total_actual_costs),
+         total_actual_costs = replace_na(total_actual_costs, 0),
+         ffs_beneficiaries = as.numeric(ffs_beneficiaries),
+         ffs_beneficiaries = replace_na(ffs_beneficiaries, 0)) %>%
+  
+#I also set the FIPS code to be a character 
+  
+  mutate(state_and_county_fips_code = as.character(state_and_county_fips_code),
+         state_and_county_fips_code = str_pad(state_and_county_fips_code, 5, pad= "0")) %>%
+  
+  #Lastly I mutate the state variable from codes to names and make a year variable.
+  
+  mutate(state = state.name[match(state,state.abb)],
+         year = 2013)
+
+#And for 2012:
+
+county_medicare_2012 <- read_excel("State County All Table 2017.xlsx", 
+    sheet = "State_county 2012", skip = 1) %>%
+  
+  #I call clean names to ease of use.
+  
+  clean_names() %>%
+  
+  #I select just the variables I will use
+  
+  select(state, county, state_and_county_fips_code, beneficiaries_with_part_a_and_part_b, ffs_beneficiaries, ma_beneficiaries, ma_participation_rate, average_age, total_actual_costs, actual_per_capita_costs) %>%
+  
+  #I then set variables to be numerics with zeroes as appropriate. 
+  
+  mutate(beneficiaries_with_part_a_and_part_b = as.numeric(beneficiaries_with_part_a_and_part_b),
+         beneficiaries_with_part_a_and_part_b = replace_na(beneficiaries_with_part_a_and_part_b, 0),
+         ma_beneficiaries = as.numeric(ma_beneficiaries),
+         ma_beneficiaries = replace_na(ma_beneficiaries, 0),
+         average_age = as.numeric(average_age),
+         average_age = replace_na(average_age, 0),
+         actual_per_capita_costs = as.numeric(actual_per_capita_costs),
+         actual_per_capita_costs = replace_na(actual_per_capita_costs, 0),
+         total_actual_costs = as.numeric(total_actual_costs),
+         total_actual_costs = replace_na(total_actual_costs, 0),
+         ffs_beneficiaries = as.numeric(ffs_beneficiaries),
+         ffs_beneficiaries = replace_na(ffs_beneficiaries, 0)) %>%
+  
+#I also set the FIPS code to be a character 
+  
+  mutate(state_and_county_fips_code = as.character(state_and_county_fips_code),
+         state_and_county_fips_code = str_pad(state_and_county_fips_code, 5, pad= "0")) %>%
+  
+  #Lastly I mutate the state variable from codes to names and make a year variable.
+  
+  mutate(state = state.name[match(state,state.abb)],
+         year = 2012)
+
+#And for 2011:
+
+county_medicare_2011 <- read_excel("State County All Table 2017.xlsx", 
+    sheet = "State_county 2011", skip = 1) %>%
+  
+  #I call clean names to ease of use.
+  
+  clean_names() %>%
+  
+  #I select just the variables I will use
+  
+  select(state, county, state_and_county_fips_code, beneficiaries_with_part_a_and_part_b, ffs_beneficiaries, ma_beneficiaries, ma_participation_rate, average_age, total_actual_costs, actual_per_capita_costs) %>%
+  
+  #I then set variables to be numerics with zeroes as appropriate. 
+  
+  mutate(beneficiaries_with_part_a_and_part_b = as.numeric(beneficiaries_with_part_a_and_part_b),
+         beneficiaries_with_part_a_and_part_b = replace_na(beneficiaries_with_part_a_and_part_b, 0),
+         ma_beneficiaries = as.numeric(ma_beneficiaries),
+         ma_beneficiaries = replace_na(ma_beneficiaries, 0),
+         average_age = as.numeric(average_age),
+         average_age = replace_na(average_age, 0),
+         actual_per_capita_costs = as.numeric(actual_per_capita_costs),
+         actual_per_capita_costs = replace_na(actual_per_capita_costs, 0),
+         total_actual_costs = as.numeric(total_actual_costs),
+         total_actual_costs = replace_na(total_actual_costs, 0),
+         ffs_beneficiaries = as.numeric(ffs_beneficiaries),
+         ffs_beneficiaries = replace_na(ffs_beneficiaries, 0)) %>%
+  
+#I also set the FIPS code to be a character 
+  
+  mutate(state_and_county_fips_code = as.character(state_and_county_fips_code),
+         state_and_county_fips_code = str_pad(state_and_county_fips_code, 5, pad= "0")) %>%
+  
+  #Lastly I mutate the state variable from codes to names and make a year variable.
+  
+  mutate(state = state.name[match(state,state.abb)],
+         year = 2011)
+
+#And for 2010:
+
+county_medicare_2010 <- read_excel("State County All Table 2017.xlsx", 
+    sheet = "State_county 2010", skip = 1) %>%
+  
+  #I call clean names to ease of use.
+  
+  clean_names() %>%
+  
+  #I select just the variables I will use
+  
+  select(state, county, state_and_county_fips_code, beneficiaries_with_part_a_and_part_b, ffs_beneficiaries, ma_beneficiaries, ma_participation_rate, average_age, total_actual_costs, actual_per_capita_costs) %>%
+  
+  #I then set variables to be numerics with zeroes as appropriate. 
+  
+  mutate(beneficiaries_with_part_a_and_part_b = as.numeric(beneficiaries_with_part_a_and_part_b),
+         beneficiaries_with_part_a_and_part_b = replace_na(beneficiaries_with_part_a_and_part_b, 0),
+         ma_beneficiaries = as.numeric(ma_beneficiaries),
+         ma_beneficiaries = replace_na(ma_beneficiaries, 0),
+         average_age = as.numeric(average_age),
+         average_age = replace_na(average_age, 0),
+         actual_per_capita_costs = as.numeric(actual_per_capita_costs),
+         actual_per_capita_costs = replace_na(actual_per_capita_costs, 0),
+         total_actual_costs = as.numeric(total_actual_costs),
+         total_actual_costs = replace_na(total_actual_costs, 0),
+         ffs_beneficiaries = as.numeric(ffs_beneficiaries),
+         ffs_beneficiaries = replace_na(ffs_beneficiaries, 0)) %>%
+  
+#I also set the FIPS code to be a character 
+  
+  mutate(state_and_county_fips_code = as.character(state_and_county_fips_code),
+         state_and_county_fips_code = str_pad(state_and_county_fips_code, 5, pad= "0")) %>%
+  
+  #Lastly I mutate the state variable from codes to names and make a year variable.
+  
+  mutate(state = state.name[match(state,state.abb)],
+         year = 2010)
+
+#And for 2009:
+
+county_medicare_2009 <- read_excel("State County All Table 2017.xlsx", 
+    sheet = "State_county 2009", skip = 1) %>%
+  
+  #I call clean names to ease of use.
+  
+  clean_names() %>%
+  
+  #I select just the variables I will use
+  
+  select(state, county, state_and_county_fips_code, beneficiaries_with_part_a_and_part_b, ffs_beneficiaries, ma_beneficiaries, ma_participation_rate, average_age, total_actual_costs, actual_per_capita_costs) %>%
+  
+  #I then set variables to be numerics with zeroes as appropriate. 
+  
+  mutate(beneficiaries_with_part_a_and_part_b = as.numeric(beneficiaries_with_part_a_and_part_b),
+         beneficiaries_with_part_a_and_part_b = replace_na(beneficiaries_with_part_a_and_part_b, 0),
+         ma_beneficiaries = as.numeric(ma_beneficiaries),
+         ma_beneficiaries = replace_na(ma_beneficiaries, 0),
+         average_age = as.numeric(average_age),
+         average_age = replace_na(average_age, 0),
+         actual_per_capita_costs = as.numeric(actual_per_capita_costs),
+         actual_per_capita_costs = replace_na(actual_per_capita_costs, 0),
+         total_actual_costs = as.numeric(total_actual_costs),
+         total_actual_costs = replace_na(total_actual_costs, 0),
+         ffs_beneficiaries = as.numeric(ffs_beneficiaries),
+         ffs_beneficiaries = replace_na(ffs_beneficiaries, 0)) %>%
+  
+#I also set the FIPS code to be a character 
+  
+  mutate(state_and_county_fips_code = as.character(state_and_county_fips_code),
+         state_and_county_fips_code = str_pad(state_and_county_fips_code, 5, pad= "0")) %>%
+  
+  #Lastly I mutate the state variable from codes to names and make a year variable.
+  
+  mutate(state = state.name[match(state,state.abb)],
+         year = 2009)
+
+#And for 2008:
+
+county_medicare_2008 <- read_excel("State County All Table 2017.xlsx", 
+    sheet = "State_county 2008", skip = 1) %>%
+  
+  #I call clean names to ease of use.
+  
+  clean_names() %>%
+  
+  #I select just the variables I will use
+  
+  select(state, county, state_and_county_fips_code, beneficiaries_with_part_a_and_part_b, ffs_beneficiaries, ma_beneficiaries, ma_participation_rate, average_age, total_actual_costs, actual_per_capita_costs) %>%
+  
+  #I then set variables to be numerics with zeroes as appropriate. 
+  
+  mutate(beneficiaries_with_part_a_and_part_b = as.numeric(beneficiaries_with_part_a_and_part_b),
+         beneficiaries_with_part_a_and_part_b = replace_na(beneficiaries_with_part_a_and_part_b, 0),
+         ma_beneficiaries = as.numeric(ma_beneficiaries),
+         ma_beneficiaries = replace_na(ma_beneficiaries, 0),
+         average_age = as.numeric(average_age),
+         average_age = replace_na(average_age, 0),
+         actual_per_capita_costs = as.numeric(actual_per_capita_costs),
+         actual_per_capita_costs = replace_na(actual_per_capita_costs, 0),
+         total_actual_costs = as.numeric(total_actual_costs),
+         total_actual_costs = replace_na(total_actual_costs, 0),
+         ffs_beneficiaries = as.numeric(ffs_beneficiaries),
+         ffs_beneficiaries = replace_na(ffs_beneficiaries, 0)) %>%
+  
+#I also set the FIPS code to be a character 
+  
+  mutate(state_and_county_fips_code = as.character(state_and_county_fips_code),
+         state_and_county_fips_code = str_pad(state_and_county_fips_code, 5, pad= "0")) %>%
+  
+  #Lastly I mutate the state variable from codes to names and make a year variable.
+  
+  mutate(state = state.name[match(state,state.abb)],
+         year = 2008)
+
+#And for 2007:
+
+county_medicare_2007 <- read_excel("State County All Table 2017.xlsx", 
+    sheet = "State_county 2007", skip = 1) %>%
+  
+  #I call clean names to ease of use.
+  
+  clean_names() %>%
+  
+  #I select just the variables I will use
+  
+  select(state, county, state_and_county_fips_code, beneficiaries_with_part_a_and_part_b, ffs_beneficiaries, ma_beneficiaries, ma_participation_rate, average_age, total_actual_costs, actual_per_capita_costs) %>%
+  
+  #I then set variables to be numerics with zeroes as appropriate. 
+  
+  mutate(beneficiaries_with_part_a_and_part_b = as.numeric(beneficiaries_with_part_a_and_part_b),
+         beneficiaries_with_part_a_and_part_b = replace_na(beneficiaries_with_part_a_and_part_b, 0),
+         ma_beneficiaries = as.numeric(ma_beneficiaries),
+         ma_beneficiaries = replace_na(ma_beneficiaries, 0),
+         average_age = as.numeric(average_age),
+         average_age = replace_na(average_age, 0),
+         actual_per_capita_costs = as.numeric(actual_per_capita_costs),
+         actual_per_capita_costs = replace_na(actual_per_capita_costs, 0),
+         total_actual_costs = as.numeric(total_actual_costs),
+         total_actual_costs = replace_na(total_actual_costs, 0),
+         ffs_beneficiaries = as.numeric(ffs_beneficiaries),
+         ffs_beneficiaries = replace_na(ffs_beneficiaries, 0)) %>%
+  
+#I also set the FIPS code to be a character 
+  
+  mutate(state_and_county_fips_code = as.character(state_and_county_fips_code),
+         state_and_county_fips_code = str_pad(state_and_county_fips_code, 5, pad= "0")) %>%
+  
+  #Lastly I mutate the state variable from codes to names and make a year variable.
+  
+  mutate(state = state.name[match(state,state.abb)],
+         year = 2007)
+
+county_year_medicare_master <- rbind(county_medicare_2007, county_medicare_2008, county_medicare_2009, county_medicare_2010, county_medicare_2011, county_medicare_2012, county_medicare_2013, county_medicare_2014, county_medicare_2015, county_medicare_2016, county_medicare_2017) %>%
+  filter(!is.na(state_and_county_fips_code))
+
+write_csv(county_year_medicare_master, "county_year_master.csv")
+
+```
