@@ -21,8 +21,9 @@ drop qual_score
 
 *Create new variables
 bys aco_id: g spend_growth = 100*(per_cap_exp[_n]-per_cap_exp[_n-1])/per_cap_exp[_n-1]
-
 bys aco_id: g spend_growth_3yr = 100*(per_cap_exp[_n]-per_cap_exp[_n-3])/per_cap_exp[_n-3]
+bys aco_id: g spend_growth_l1 = spend_growth[_n-1]
+bys aco_id: g per_cap_exp_l1 = per_cap_exp[_n-1]
 
 *Label the variables
 lab var aco_num "ACO ID"
@@ -38,6 +39,7 @@ lab var earn_save_loss "Shared Savings Earned"
 lab var per_cap_bnchmk "Per Capita Benchmark"
 lab var total_bnchmk "Total Benchmark"
 lab var total_exp "Total Expenditures"
+lab var per_cap_exp "Per Capita Spending"
 lab var final_share_rate "Shared Savings Rate"
 lab var service_length "Days of ACO Operation"
 lab var year "Year"
@@ -46,6 +48,7 @@ lab var exit "Exited MSSP This Year"
 lab var counties "Number of Counties"
 lab var quality_score "Quality Score"
 lab var spend_growth "Per Capita Spending Growth"
+lab var spend_growth_3yr "3 Year Per Capita Spending Growth"
 
 *Analysis
 
@@ -82,11 +85,14 @@ outreg2 using output/ACO_Growth_on_Spending_Results.doc, append ctitle("T-3")
 
 xtreg spend_growth l.spend_growth, r
 
-outreg2 using Output/ACO_Growth_on_Growth_Results.doc, replace ctitle("T-1") dec(5) title(Table X. Per Capita Spending Growth on Lagged Per Capita Spending Growth)nonotes addnote(NOTE--Table reports regression coefficients with robust standard errors in parentheses. The dependent variable in each regression is the 3 year growth rate in an ACO's per capita spending at the ACO-year level., ***p<0.01 **p<0.05 *p<0.1)
+outreg2 using Output/ACO_Growth_on_Growth_Results.doc, replace ctitle("T-1") dec(5) title(Table X. Per Capita Spending Growth on Lagged Per Capita Spending Growth) nonotes addnote(NOTE--Table reports regression coefficients with robust standard errors in parentheses. The dependent variable in each regression is the 3 year growth rate in an ACO's per capita spending at the ACO-year level., ***p<0.01 **p<0.05 *p<0.1)
 
 xtreg spend_growth l2.spend_growth, r
 
 outreg2 using output/ACO_Growth_on_Growth_Results.doc, append ctitle("T-2")
 
+*Figures
+twoway (scatter spend_growth per_cap_exp_l1, mcolor(%50)) (lfit spend_growth per_cap_exp_l1), ytitle(Per Capita Spending Growth (%)) xtitle(Lagged Per Capita Spending ($)) legend(off)
 
+twoway (scatter spend_growth spend_growth_l1, mcolor(%50)) (lfit spend_growth spend_growth_l1), ytitle(Per Capita Spending Growth (%)) xtitle(Lagged Per Capita Spending Growth (%)) legend(off)
 
